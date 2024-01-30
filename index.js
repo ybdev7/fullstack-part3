@@ -31,7 +31,22 @@ let persons = [
   {
     id: 5,
     name: "Mary Poppen",
+    number: "39-23-6423175",
+  },
+  {
+    id: 6,
+    name: "Mary Poppen",
+    number: "39-23-6423167",
+  },
+  {
+    id: 7,
+    name: "Mary Poppen",
     number: "39-23-6423177",
+  },
+  {
+    id: 8,
+    name: "Mary Poppen",
+    number: "39-23-6423178",
   },
 ];
 app.get("/", (req, res) => {
@@ -48,6 +63,14 @@ app.get("/info", (req, res) => {
 
 app.get(`/${API_URL}/${PERSONS_URL}`, (req, res) => {
   res.json(persons);
+});
+
+/**3.4 */
+app.delete(`/${API_URL}/${PERSONS_URL}/:id`, (req, res) => {
+  const id = Number(req.params.id);
+  persons = persons.filter((person) => person.id !== id);
+
+  res.status(204).end();
 });
 
 app.get(`/${API_URL}/${PERSONS_URL}/:id`, (req, res) => {
