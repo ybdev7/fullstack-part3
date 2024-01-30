@@ -38,6 +38,14 @@ app.get("/", (req, res) => {
   res.send("<p>Service running...</p>");
 });
 
+app.get("/info", (req, res) => {
+  res.send(
+    `<p>Phonebook has information for ${
+      persons?.length
+    } people.</br>${new Date().toString()}</p>`
+  );
+});
+
 app.get(`/${API_URL}/${PERSONS_URL}`, (req, res) => {
   res.json(persons);
 });
