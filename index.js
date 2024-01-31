@@ -65,7 +65,7 @@ app.get(`/${API_URL}/${PERSONS_URL}`, (req, res) => {
   res.json(persons);
 });
 /**
- * 3.5
+ * 3.5 and 3.6
  */
 app.post(`/${API_URL}/${PERSONS_URL}`, (req, res) => {
   const id = Math.round(Math.random() * 1000000000);
@@ -74,6 +74,8 @@ app.post(`/${API_URL}/${PERSONS_URL}`, (req, res) => {
     return res.status(400).json({ error: "name missing" });
   } else if (!req.body.number) {
     return res.status(400).json({ error: "number missing" });
+  } else if (doesNameExist(req.body.name)) {
+    return res.status(422).json({ error: "name must be unique" });
   }
 
   const person = { id: id, name: req.body.name, number: req.body.number };
@@ -82,6 +84,13 @@ app.post(`/${API_URL}/${PERSONS_URL}`, (req, res) => {
   console.log(`Added person ${person.name}`);
   res.json(person);
 });
+
+const doesNameExist = (name) => {
+  const found = persons.find(
+    (person) => person.name.toLowerCase() === name.toLowerCase()
+  );
+  return found;
+};
 
 /**3.4 */
 app.delete(`/${API_URL}/${PERSONS_URL}/:id`, (req, res) => {
