@@ -1,7 +1,44 @@
 const express = require("express");
 const app = express();
 
+var morgan = require("morgan");
+morgan.token("post-data", (req, res) => {
+  return JSON.stringify(req.body);
+});
+
 app.use(express.json());
+
+/**log for every request method different than POST */
+app.use(
+  morgan("tiny", {
+    skip: function (req, res) {
+      return req.method === "POST";
+    },
+  })
+);
+
+/** log for POST method */
+app.use(
+  morgan(
+    function (tokens, req, res) {
+      return [
+        tokens.method(req, res),
+        tokens.url(req, res),
+        tokens.status(req, res),
+        tokens.res(req, res, "content-length"),
+        "-",
+        tokens["response-time"](req, res),
+        "ms",
+        tokens["post-data"](req, res),
+      ].join(" ");
+    },
+    {
+      skip: function (req, res) {
+        return req.method !== "POST";
+      },
+    }
+  )
+);
 
 const PORT = 3001;
 const API_URL = "api";
