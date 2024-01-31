@@ -64,6 +64,24 @@ app.get("/info", (req, res) => {
 app.get(`/${API_URL}/${PERSONS_URL}`, (req, res) => {
   res.json(persons);
 });
+/**
+ * 3.5
+ */
+app.post(`/${API_URL}/${PERSONS_URL}`, (req, res) => {
+  const id = Math.round(Math.random() * 1000000000);
+
+  if (!req.body.name) {
+    return res.status(400).json({ error: "name missing" });
+  } else if (!req.body.number) {
+    return res.status(400).json({ error: "number missing" });
+  }
+
+  const person = { id: id, name: req.body.name, number: req.body.number };
+  persons = persons.concat(person);
+
+  console.log(`Added person ${person.name}`);
+  res.json(person);
+});
 
 /**3.4 */
 app.delete(`/${API_URL}/${PERSONS_URL}/:id`, (req, res) => {
