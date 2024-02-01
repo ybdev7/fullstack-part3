@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 
 var morgan = require("morgan");
@@ -7,6 +8,7 @@ morgan.token("post-data", (req, res) => {
 });
 
 app.use(express.json());
+app.use(cors());
 
 /**log for every request method different than POST */
 app.use(
@@ -40,7 +42,7 @@ app.use(
   )
 );
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const API_URL = "api";
 const PERSONS_URL = "persons";
 
