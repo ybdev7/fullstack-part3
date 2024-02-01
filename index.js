@@ -9,6 +9,7 @@ morgan.token("post-data", (req, res) => {
 
 app.use(express.json());
 app.use(cors());
+app.use(express.static("dist"));
 
 /**log for every request method different than POST */
 app.use(
@@ -88,9 +89,6 @@ let persons = [
     number: "39-23-6423178",
   },
 ];
-app.get("/", (req, res) => {
-  res.send("<p>Service running...</p>");
-});
 
 app.get("/info", (req, res) => {
   res.send(
