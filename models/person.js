@@ -2,9 +2,11 @@ const mongoose = require("mongoose");
 
 const url = process.env.MONGODB_URI;
 
-console.log(
-  `Connecting to ${url.replace(process.env.MONGODB_PWD, "********")}`
-);
+try {
+  console.log(
+    `Connecting to ${url.replace(process.env.MONGODB_PWD, "********")}`
+  );
+} catch {}
 
 mongoose.set("strictQuery", false);
 mongoose
