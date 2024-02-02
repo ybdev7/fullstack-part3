@@ -10,9 +10,25 @@ morgan.token("post-data", (req, res) => {
   return JSON.stringify(req.body);
 });
 
-app.use(express.json());
-app.use(cors());
+const logger = (request, response, next) => {
+  console.log(
+    ">>>",
+    new Date().toLocaleString(),
+    " Method:",
+    request.method,
+    " Path:  ",
+    request.path,
+    " Body:  ",
+    request.body
+  );
+  console.log("<<<");
+  next();
+};
+
 app.use(express.static("dist"));
+app.use(express.json());
+app.use(logger);
+app.use(cors());
 
 /**log for every request method different than POST */
 app.use(
@@ -49,49 +65,6 @@ app.use(
 const PORT = process.env.PORT;
 const API_URL = "api";
 const PERSONS_URL = "persons";
-
-// let persons = [
-//   {
-//     id: 1,
-//     name: "Arto Hellas",
-//     number: "040-123456",
-//   },
-//   {
-//     id: 2,
-//     name: "Ada Lovelace",
-//     number: "39-44-5323523",
-//   },
-//   {
-//     id: 3,
-//     name: "Dan Abramov",
-//     number: "12-43-234345",
-//   },
-//   {
-//     id: 4,
-//     name: "Mary Poppendieck",
-//     number: "39-23-6423122",
-//   },
-//   {
-//     id: 5,
-//     name: "Mary Poppen",
-//     number: "39-23-6423175",
-//   },
-//   {
-//     id: 6,
-//     name: "Mary Poppen",
-//     number: "39-23-6423167",
-//   },
-//   {
-//     id: 7,
-//     name: "Mary Poppen",
-//     number: "39-23-6423177",
-//   },
-//   {
-//     id: 8,
-//     name: "Mary Poppen",
-//     number: "39-23-6423178",
-//   },
-// ];
 
 app.get("/info", (req, res) => {
   Person.find({}).then((persons) =>
@@ -146,7 +119,7 @@ app.delete(`/${API_URL}/${PERSONS_URL}/:id`, (req, res) => {
     });
 });
 
-app.get(`/${API_URL}/${PERSONS_URL}/:id`, (req, res) => {
+app.get(`/${API_URL}/${PERSONS_URL}/:id`, (req, res, next) => {
   Person.findById(req.params.id)
     .then((person) => {
       if (person) res.json(person);
@@ -155,12 +128,33 @@ app.get(`/${API_URL}/${PERSONS_URL}/:id`, (req, res) => {
         res.status(404).end();
       }
     })
-    .catch((ex) => {
-      console.log(ex);
-      res.statusMessage = "Person not found";
-      res.status(404).end();
-    });
+    .catch(
+      (ex) => next(ex)
+      // {
+      //   console.log(ex);
+      //   res.statusMessage = "Person not found";
+      //   res.status(400).send({ error: "malformatted id" });
+      // }
+    );
 });
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: "unknown endpoint" });
+};
+
+// handler of requests with unknown endpoint
+app.use(unknownEndpoint);
+
+const errorHandler = (error, request, response, next) => {
+  console.error("!!", error.message);
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  }
+
+  next(error);
+};
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
