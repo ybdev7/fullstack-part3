@@ -66,23 +66,28 @@ const PORT = process.env.PORT;
 const API_URL = "api";
 const PERSONS_URL = "persons";
 
-app.get("/info", (req, res) => {
-  Person.find({}).then((persons) =>
-    res.send(
-      `<p>Phonebook has information for ${persons.length} people.</br>
+/**3.18 */
+app.get("/info", (req, res, next) => {
+  Person.find({})
+    .then((persons) =>
+      res.send(
+        `<p>Phonebook has information for ${persons.length} people.</br>
      ${new Date().toString()}</p>`
+      )
     )
-  );
+    .catch((err) => next(err));
 });
 
 /**3.13 */
-app.get(`/${API_URL}/${PERSONS_URL}`, (req, res) => {
-  Person.find({}).then((persons) => res.json(persons));
+app.get(`/${API_URL}/${PERSONS_URL}`, (req, res, next) => {
+  Person.find({})
+    .then((persons) => res.json(persons))
+    .catch((err) => next(err));
 });
 /**
  * 3.5 and 3.6, 3.13
  */
-app.post(`/${API_URL}/${PERSONS_URL}`, (req, res) => {
+app.post(`/${API_URL}/${PERSONS_URL}`, (req, res, next) => {
   if (!req.body.name) {
     return res.status(400).json({ error: "name missing" });
   } else if (!req.body.number) {
@@ -99,26 +104,45 @@ app.post(`/${API_URL}/${PERSONS_URL}`, (req, res) => {
           name: req.body.name,
           number: req.body.number,
         });
-        person.save().then((newPerson) => {
-          console.log(`Added person ${person.name}`);
-          res.json(newPerson);
-        });
+        person
+          .save()
+          .then((newPerson) => {
+            console.log(`Added person ${person.name}`);
+            res.json(newPerson);
+          })
+          .catch((err) => next(err));
       }
     }
   );
 });
 
-/**3.4 , 3.13*/
-app.delete(`/${API_URL}/${PERSONS_URL}/:id`, (req, res) => {
-  const id = req.params.id;
-  Person.deleteOne({ _id: id })
-    .then((person) => res.status(204).end())
-    .catch((ex) => {
-      console.log(ex);
-      res.status(204).end();
-    });
+/**3.4 , 3.13 3.15*/
+app.delete(`/${API_URL}/${PERSONS_URL}/:id`, (req, res, next) => {
+  Person.findByIdAndDelete(req.params.id)
+    .then((result) => res.status(204).end())
+    .catch((ex) => next(ex));
 });
 
+/** 3.17*/
+app.put(`/${API_URL}/${PERSONS_URL}/:id`, (req, res, next) => {
+  const body = req.body;
+
+  const person = {
+    name: req.body.name,
+    number: req.body.number,
+  };
+  Person.findByIdAndUpdate(req.params.id, person, { new: true })
+    .then((updatedPerson) => {
+      if (updatedPerson) res.json(updatedPerson);
+      else {
+        res.statusMessage = "Person not found";
+        res.status(404).end();
+      }
+    })
+    .catch((ex) => next(ex));
+});
+
+/**3.18 */
 app.get(`/${API_URL}/${PERSONS_URL}/:id`, (req, res, next) => {
   Person.findById(req.params.id)
     .then((person) => {
@@ -145,6 +169,7 @@ const unknownEndpoint = (request, response) => {
 // handler of requests with unknown endpoint
 app.use(unknownEndpoint);
 
+/**3.16 */
 const errorHandler = (error, request, response, next) => {
   console.error("!!", error.message);
 
