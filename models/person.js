@@ -21,7 +21,9 @@ const personSchema = new mongoose.Schema({
     // phone number must have length of 8 or more be formed of two parts that are separated by -, the first part has two or three numbers and the second part also consists of numbers
     validate: {
       validator: function (num) {
-        return /[0-9]{2}-[0-9]{6,}/.test(num) || /[0-9]{3}-[0-9]{5,}/.test(num);
+        return (
+          /^[0-9]{2}-[0-9]{6,}/.test(num) || /[0-9]{3}-[0-9]{5,}$/.test(num)
+        );
       },
       message: (props) =>
         `phone number must have length of 8 or more and be formed as ##-###### or ###-#####`,
