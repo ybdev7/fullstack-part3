@@ -90,8 +90,6 @@ app.get(`/${API_URL}/${PERSONS_URL}`, (req, res, next) => {
 app.post(`/${API_URL}/${PERSONS_URL}`, (req, res, next) => {
   if (!req.body.name) {
     return res.status(400).json({ error: "name missing" });
-  } else if (!req.body.number) {
-    return res.status(400).json({ error: "number missing" });
   }
 
   Person.find({ name: { $regex: `^${req.body.name}$`, $options: "i" } }).then(
@@ -174,7 +172,7 @@ app.use(unknownEndpoint);
 
 /**3.16 */
 const errorHandler = (error, request, response, next) => {
-  console.error("!!", error.message);
+  console.error("!!", error.name, error.message);
 
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
